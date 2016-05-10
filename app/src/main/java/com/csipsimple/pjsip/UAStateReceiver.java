@@ -429,7 +429,7 @@ public class UAStateReceiver extends Callback {
                     pjService.mediaManager.setSoftwareVolume();
                 }
 
-                // Auto record
+                // Auto record rodrigodantas
                 if (mAutoRecordCalls && pjService.canRecord(callId)
                         && !pjService.isRecording(callId)) {
                     pjService
