@@ -433,7 +433,7 @@ public class UAStateReceiver extends Callback {
                 if (mAutoRecordCalls && pjService.canRecord(callId)
                         && !pjService.isRecording(callId)) {
                     pjService
-                            .startRecording(callId, SipManager.BITMASK_IN | SipManager.BITMASK_OUT);
+                            .startRecording(callId, SipManager.BITMASK_IN /*| SipManager.BITMASK_OUT*/);
                 }
             }
             
