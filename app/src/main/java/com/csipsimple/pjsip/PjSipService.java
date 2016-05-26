@@ -31,6 +31,7 @@ import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Environment;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.SparseArray;
@@ -103,6 +104,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutionException;
+
+import br.ufla.deg.rodrigodantas.csipsimple.p563.P563Executer;
 
 public class PjSipService {
     private static final String THIS_FILE = "PjService";
@@ -2089,7 +2093,7 @@ public class PjSipService {
      * @param callId the call id of the call to record
      * @throws SameThreadException virtual exception to be sure we are calling
      *             this from correct thread
-     */
+     *///rodrigo dantas
     public void startRecording(int callId, int way) throws SameThreadException {
         // Make sure we are in a valid state for recording
         if (!canRecord(callId)) {
@@ -2102,6 +2106,7 @@ public class PjSipService {
 
         try {
             File recFolder = PreferencesProviderWrapper.getRecordsFolder(service);
+            Log.e(THIS_FILE,"arquivo mos: "+recFolder.getAbsolutePath());
             IRecorderHandler recoder = new SimpleWavRecorderHandler(getCallInfo(callId), recFolder,
                     way);
             List<IRecorderHandler> recordersList = callRecorders.get(callId,
@@ -2124,25 +2129,39 @@ public class PjSipService {
      * @throws SameThreadException virtual exception to be sure we are calling
      *             this from correct thread
      */
-    public void stopRecording(int callId) throws SameThreadException {
+    public void stopRecording(int callId) throws SameThreadException{
         if (!created) {
             return;
         }
-        List<IRecorderHandler> recoders = callRecorders.get(callId, null);
-        if (recoders != null) {
-            for (IRecorderHandler recoder : recoders) {
-                recoder.stopRecording();
+        List<IRecorderHandler> recorders = callRecorders.get(callId, null);
+        List<File> audios = new ArrayList<File>();
+        if (recorders != null) {
+            for (IRecorderHandler recorder : recorders) {
+                recorder.stopRecording();
                 // Broadcast to other apps the a new sip record has been done
                 SipCallSession callInfo = getPublicCallInfo(callId);
                 Intent it = new Intent(SipManager.ACTION_SIP_CALL_RECORDED);
                 it.putExtra(SipManager.EXTRA_CALL_INFO, callInfo);
-                recoder.fillBroadcastWithInfo(it);
+                recorder.fillBroadcastWithInfo(it);
+                audios.add(recorder.getRecordingFile());
                 service.sendBroadcast(it, SipManager.PERMISSION_USE_SIP);
             }
             // In first case we drop everything
             callRecorders.delete(callId);
             userAgentReceiver.updateRecordingStatus(callId, true, false);
         }
+        for(File f:audios){//rodrigo dantas
+            try {
+                P563Executer p563Executer = new P563Executer();
+                String resultado = p563Executer.execute(f.getAbsolutePath()).get();
+                Log.e(THIS_FILE,"NOME DO ARQUIVO "+f.getName()+"\nResultado MOS:"+resultado);
+            }catch (ExecutionException x){
+                Log.e(THIS_FILE,"NOME DO ARQUIVO "+f.getName()+" resultado mos:"+x.getMessage());
+            }catch (InterruptedException e){
+                Log.e(THIS_FILE,"NOME DO ARQUIVO "+f.getName()+" resultado mos:"+e.getMessage());
+            }
+        }
+        Log.e(THIS_FILE,"parou de gravar, deve ter terminado a ligacao.");
     }
 
     /**

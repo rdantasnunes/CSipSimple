@@ -4,7 +4,7 @@ import android.os.AsyncTask;
 import android.os.Environment;
 
 /**
- * Created by Rodrigo on 5/24/16.
+ * Created by Rodrigo on 24/5/16.
  */
 public class P563Executer extends AsyncTask<String, Void, String> {
 
@@ -13,7 +13,7 @@ public class P563Executer extends AsyncTask<String, Void, String> {
     static {
         System.loadLibrary("native-audio-jni");
     }
-//Java_br_ufla_deg_rodrigodantas_csipsimple_p563_P563Executer_p563
+
     @Override
     protected String doInBackground(String... params) {
         if(params == null || params.length == 0)
@@ -24,7 +24,7 @@ public class P563Executer extends AsyncTask<String, Void, String> {
             return "";
         }
 
-        String t = p563(params[0]);//teste(params[0], " asdfasdfasdf");//p563Float(params[0]);
+        String t = p563(params[0]);
         System.out.println(params[0]+" MOS P.563=>" + t);
         return String.valueOf(t);
     }

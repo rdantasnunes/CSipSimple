@@ -23,6 +23,8 @@ package com.csipsimple.pjsip.recorder;
 
 import android.content.Intent;
 
+import java.io.File;
+
 public interface IRecorderHandler {
     public final static int INVALID_RECORDER = -1;
 
@@ -31,4 +33,6 @@ public interface IRecorderHandler {
     public void stopRecording();
 
     public void fillBroadcastWithInfo(Intent it);
+
+    public File getRecordingFile();
 }

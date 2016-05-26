@@ -42,6 +42,8 @@ public class SimpleWavRecorderHandler implements IRecorderHandler {
     private final int recorderId;
     private final String recordingPath;
 
+    private File recordingFile;
+
     public SimpleWavRecorderHandler(SipCallSession callInfo, File recordFolder, int way)
             throws SameThreadException, IOException {
         this.way = way;
@@ -51,6 +53,7 @@ public class SimpleWavRecorderHandler implements IRecorderHandler {
         if (targetFile == null) {
             throw new IOException("No target file possible");
         }
+        recordingFile = targetFile;
         recordingPath = targetFile.getAbsolutePath();
         pj_str_t file = pjsua.pj_str_copy(recordingPath);
         int[] rcId = new int[1];
@@ -116,6 +119,14 @@ public class SimpleWavRecorderHandler implements IRecorderHandler {
     public void fillBroadcastWithInfo(Intent it) {
         it.putExtra(SipManager.EXTRA_FILE_PATH, recordingPath);
         it.putExtra(SipManager.EXTRA_SIP_CALL_CALL_WAY, way);
+    }
+
+    /**
+     *
+     * @return Retorna o arquivo de audio sendo gravado
+     */
+    public File getRecordingFile(){
+        return this.recordingFile;
     }
 
 }
