@@ -1,7 +1,8 @@
-CSipSimple
+Modified CSipSimple
 ==========
 
-CSipSimple for Android Studio Project
+-CSipSimple for Android Studio Project
+-This application was modified to increase functionality to evaluation voice quality based on Mean Opinion Score (MOS) and this modification is part of MS degree work of Rodrigo Dantas Nunes at Federal University of Lavras-MG, Brazil.
 
 ##change
 
