@@ -3,6 +3,7 @@ package br.ufla.deg.rodrigodantas.csipsimple.control;
 import com.csipsimple.utils.Log;
 
 import java.io.File;
+import java.text.NumberFormat;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
@@ -58,9 +59,33 @@ public class MosEvaluationControl {
         this.sample = VadUtils.vad(this.sample.getAbsolutePath());
     }
 
-    private String executeAdjustmentFunction(String mos){
+    private float getPacketLossRate(){
         //TODO: Implementar
-        return mos;
+        return 0f;
+    }
+
+    /**
+     * Adjustment function implemantation, where n is the packet loss rate in the network.
+     * f(n) = alpha*nˆ3 + beta*n^2 + gama*n + D
+     *
+     * @param mos obtained from audio sample
+     * @return MOS ajusted by f(n) above.
+     */
+    private float executeAdjustmentFunction(float mos){
+
+        double n = getPacketLossRate(); //n is packet loss rate;
+        double alpha = -0.00002;
+        double beta = 0.001;
+        double gama = -0.043;
+        double D = 1.059;
+        double f_n = alpha*Math.pow(n,3d) + beta*Math.pow(n,2d) + gama*n + D;
+        float mosAjustado = new Double(mos*f_n).floatValue();
+
+        Log.d("Metodo executeAdjustmentFunction",String.format("MOS: %06d",mos));
+        Log.d("Metodo executeAdjustmentFunction",String.format("f(n): %06d",f_n));
+        Log.d("Metodo executeAdjustmentFunction",String.format("MOS ajustado: %06d",mosAjustado));
+
+        return mosAjustado;
     }
 
     public void calculate() throws Exception {
@@ -68,14 +93,14 @@ public class MosEvaluationControl {
         executeVAD();
 
         String mos = calculateP563();
-        float mosF = Utils.parseToFloat(mos);
+        Float mosF = Utils.parseToFloat(mos);
         if(mosF == -1){
             throw new Exception(mos);
         }
 
-        mos = executeAdjustmentFunction(mos);
+        mosF = executeAdjustmentFunction(mosF);
 
-        this.mosEvaluation = new MosEvaluation(this.sample.getAbsolutePath(), mos,new Date(),
+        this.mosEvaluation = new MosEvaluation(this.sample.getAbsolutePath(),String.format("%06d",mosF),new Date(),
                 VadUtils.durationOfAudioSample(this.sample));
     }
 
