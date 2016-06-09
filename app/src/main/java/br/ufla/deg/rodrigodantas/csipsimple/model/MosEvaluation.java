@@ -54,7 +54,7 @@ public class MosEvaluation {
     public String toString(){
         return "Arquivo: "+this.file+
                 "\nDuracao: "+ durationInSeconds +
-                "\nPreçoPorSegundo: R$"+(new Float(pricePerMinute /60)).intValue()+
+                "\nPreçoPorSegundo: R$"+(new Float(pricePerMinute /60)).doubleValue()+
                 "\nMOS: "+this.mos+
                 "\nValor Justo Sugerido: "+this.fairPriceSuggested;
     }

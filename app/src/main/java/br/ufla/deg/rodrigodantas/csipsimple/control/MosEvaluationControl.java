@@ -1,11 +1,15 @@
 package br.ufla.deg.rodrigodantas.csipsimple.control;
 
+import android.content.Context;
+
 import com.csipsimple.utils.Log;
 
 import java.io.File;
 import java.text.NumberFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.SimpleFormatter;
 
 import br.ufla.deg.rodrigodantas.csipsimple.model.MosEvaluation;
 import br.ufla.deg.rodrigodantas.csipsimple.p563.P563Executer;
@@ -29,18 +33,22 @@ public class MosEvaluationControl {
 
     private MosEvaluation mosEvaluation;
 
-    public MosEvaluationControl(File sample, float packetLossRate){
+    private Context context;
+
+    private NumberFormat f = NumberFormat.getInstance(new Locale("en","US"));
+
+    public MosEvaluationControl(File sample, float packetLossRate, Context context){
         super();
         this.sample = sample;
         this.packetLossRate = packetLossRate;
+        this.context = context;
+        f.setMaximumFractionDigits(6);
     }
 
     private String calculateP563(){
         try{
             P563Executer p563Executer = new P563Executer();
             String resultado = p563Executer.execute(this.sample.getAbsolutePath()).get();
-            //TODO: remove line below after development was concluded
-            Log.d(this.getClass().getSimpleName(),"NOME DO ARQUIVO "+sample.getName()+"\nResultado MOS:"+resultado);
             return resultado;
         }catch (ExecutionException x){
             Log.e(this.getClass().getSimpleName(),"File Path "+sample.getName()+" Exc. Message: "+x.getMessage(),x);
@@ -60,8 +68,7 @@ public class MosEvaluationControl {
     }
 
     private float getPacketLossRate(){
-        //TODO: Implementar
-        return 0f;
+        return this.packetLossRate;
     }
 
     /**
@@ -81,9 +88,9 @@ public class MosEvaluationControl {
         double f_n = alpha*Math.pow(n,3d) + beta*Math.pow(n,2d) + gama*n + D;
         float mosAjustado = new Double(mos*f_n).floatValue();
 
-        Log.d("Metodo executeAdjustmentFunction",String.format("MOS: %06d",mos));
-        Log.d("Metodo executeAdjustmentFunction",String.format("f(n): %06d",f_n));
-        Log.d("Metodo executeAdjustmentFunction",String.format("MOS ajustado: %06d",mosAjustado));
+        Log.d("Metodo executeAdjustmentFunction MOS: ",f.format(mos));
+        Log.d("Metodo executeAdjustmentFunction f(n): ",f.format(f_n));
+        Log.d("Metodo executeAdjustmentFunction MOS ajustado: ",f.format(mosAjustado));
 
         return mosAjustado;
     }
@@ -93,6 +100,7 @@ public class MosEvaluationControl {
         executeVAD();
 
         String mos = calculateP563();
+
         Float mosF = Utils.parseToFloat(mos);
         if(mosF == -1){
             throw new Exception(mos);
@@ -100,8 +108,10 @@ public class MosEvaluationControl {
 
         mosF = executeAdjustmentFunction(mosF);
 
-        this.mosEvaluation = new MosEvaluation(this.sample.getAbsolutePath(),String.format("%06d",mosF),new Date(),
-                VadUtils.durationOfAudioSample(this.sample));
+        this.mosEvaluation = new MosEvaluation(this.sample.getAbsolutePath(),
+                f.format(mosF.doubleValue()),new Date(),
+                VadUtils.durationOfAudioSample(this.sample,context));
+
     }
 
     public MosEvaluation getMosEvaluation(){

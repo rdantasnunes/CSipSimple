@@ -1,5 +1,6 @@
 package br.ufla.deg.rodrigodantas.csipsimple.vad;
 
+import android.content.Context;
 import android.media.MediaPlayer;
 import android.net.Uri;
 
@@ -43,8 +44,8 @@ public class VadUtils {
         return out.toByteArray();
     }
 
-    public static int durationOfAudioSample(File file){
-        MediaPlayer mp = MediaPlayer.create(null, Uri.parse(file.getAbsolutePath()));
+    public static int durationOfAudioSample(File file, Context context){
+        MediaPlayer mp = MediaPlayer.create(context, Uri.parse(file.getAbsolutePath()));
         return mp.getDuration()/1000;
     }
 

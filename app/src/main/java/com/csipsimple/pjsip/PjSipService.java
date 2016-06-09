@@ -106,6 +106,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 
+import br.ufla.deg.rodrigodantas.csipsimple.control.MosEvaluationControl;
 import br.ufla.deg.rodrigodantas.csipsimple.p563.P563Executer;
 
 public class PjSipService {
@@ -2152,15 +2153,19 @@ public class PjSipService {
         }
         for(File f:audios){//rodrigo dantas
             try {
-                P563Executer p563Executer = new P563Executer();
-                String resultado = p563Executer.execute(f.getAbsolutePath()).get();
-                Log.e(THIS_FILE,"NOME DO ARQUIVO "+f.getName()+"\nResultado MOS:"+resultado);
+                MosEvaluationControl mosControl = new MosEvaluationControl(f,10f,service);
+                mosControl.calculate();
+                String resultado = mosControl.getMosEvaluation().toString();
+                Log.e(THIS_FILE,"\nResultado: "+resultado);
             }catch (ExecutionException x){
-                Log.e(THIS_FILE,"NOME DO ARQUIVO "+f.getName()+" resultado mos:"+x.getMessage());
+                Log.e(THIS_FILE,"ExecutionException ==> "+x.getMessage());
             }catch (InterruptedException e){
-                Log.e(THIS_FILE,"NOME DO ARQUIVO "+f.getName()+" resultado mos:"+e.getMessage());
+                Log.e(THIS_FILE,"InterruptedException ==> "+e.getMessage());
+            }catch(Exception e){
+                Log.e(THIS_FILE,"Exception ==> "+e.getMessage());
             }
         }
+
         Log.e(THIS_FILE,"parou de gravar, deve ter terminado a ligacao.");
     }
 
