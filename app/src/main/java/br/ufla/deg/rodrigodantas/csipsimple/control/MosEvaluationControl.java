@@ -88,9 +88,10 @@ public class MosEvaluationControl {
         double f_n = alpha*Math.pow(n,3d) + beta*Math.pow(n,2d) + gama*n + D;
         float mosAjustado = new Double(mos*f_n).floatValue();
 
-        Log.d("Metodo executeAdjustmentFunction MOS: ",f.format(mos));
-        Log.d("Metodo executeAdjustmentFunction f(n): ",f.format(f_n));
-        Log.d("Metodo executeAdjustmentFunction MOS ajustado: ",f.format(mosAjustado));
+        System.out.println("Metodo executeAdjustmentFunction MOS: "+f.format(mos));
+        System.out.println("Metodo executeAdjustmentFunction n: "+f.format(n));
+        System.out.println("Metodo executeAdjustmentFunction f(n): "+f.format(f_n));
+        System.out.println("Metodo executeAdjustmentFunction MOS ajustado: "+f.format(mosAjustado));
 
         return mosAjustado;
     }

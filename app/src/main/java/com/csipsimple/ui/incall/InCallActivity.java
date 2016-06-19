@@ -62,6 +62,7 @@ import com.csipsimple.api.SipCallSession.StatusCode;
 import com.csipsimple.api.SipConfigManager;
 import com.csipsimple.api.SipManager;
 import com.csipsimple.api.SipProfile;
+import com.csipsimple.pjsip.PjSipService;
 import com.csipsimple.service.SipService;
 import com.csipsimple.ui.PickupSipUri;
 import com.csipsimple.ui.incall.CallProximityManager.ProximityDirector;
@@ -82,10 +83,13 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import br.ufla.deg.rodrigodantas.csipsimple.model.MosEvaluation;
+
 public class InCallActivity extends SherlockFragmentActivity implements IOnCallActionTrigger, 
         IOnLeftRightChoice, ProximityDirector, OnDtmfListener {
     private static final int QUIT_DELAY = 3000;
     private final static String THIS_FILE = "InCallActivity";
+    public static InCallActivity inCallActivity;
     //private final static int DRAGGING_DELAY = 150;
     
 
@@ -142,7 +146,7 @@ public class InCallActivity extends SherlockFragmentActivity implements IOnCallA
         //handler.setActivityInstance(this);
         Log.d(THIS_FILE, "Create in call");
         setContentView(R.layout.in_call_main);
-
+        InCallActivity.inCallActivity = this;
         SipCallSession initialSession = getIntent().getParcelableExtra(SipManager.EXTRA_CALL_INFO);
         synchronized (callMutex) {
             callsInfo = new SipCallSession[1];
@@ -480,7 +484,7 @@ public class InCallActivity extends SherlockFragmentActivity implements IOnCallA
     
             int mainsCalls = 0;
             int heldsCalls = 0;
-    
+
             synchronized (callMutex) {
                 if (callsInfo != null) {
                     for (SipCallSession callInfo : callsInfo) {
@@ -523,7 +527,6 @@ public class InCallActivity extends SherlockFragmentActivity implements IOnCallA
                 Log.d(THIS_FILE, "Update ui from call " + mainCallInfo.getCallId() + " state "
                         + CallsUtils.getStringCallState(mainCallInfo, InCallActivity.this));
                 int state = mainCallInfo.getCallState();
-    
                 //int backgroundResId = R.drawable.bg_in_call_gradient_unidentified;
     
                 // We manage wake lock
@@ -889,6 +892,7 @@ public class InCallActivity extends SherlockFragmentActivity implements IOnCallA
                 case TERMINATE_CALL: {
                     if (service != null) {
                         service.hangup(call.getCallId(), 0);
+                        System.out.println("passou pelo ontrigger do incallactivity");
                     }
                     break;
                 }
@@ -1400,6 +1404,10 @@ public class InCallActivity extends SherlockFragmentActivity implements IOnCallA
         }
     }
 
+    public ISipService getService(){
+        return this.service;
+    }
+
     
     // Active call adapter
     private class CallsAdapter extends BaseAdapter {
@@ -1520,7 +1528,5 @@ public class InCallActivity extends SherlockFragmentActivity implements IOnCallA
         }
         
     }
-
-
 
 }

@@ -56,6 +56,7 @@ import com.csipsimple.api.SipProfile;
 import com.csipsimple.api.SipUri;
 import com.csipsimple.api.SipUri.ParsedSipContactInfos;
 import com.csipsimple.models.CallerInfo;
+import com.csipsimple.pjsip.PjSipService;
 import com.csipsimple.service.SipService;
 import com.csipsimple.utils.ContactsAsyncHelper;
 import com.csipsimple.utils.CustomDistribution;
@@ -99,9 +100,11 @@ public class InCallCard extends FrameLayout implements OnClickListener, Callback
 
     private Map<String, DynActivityPlugin> incallPlugins;
 
+    public static InCallCard inCallCard;
 
     public InCallCard(Context context, AttributeSet attrs) {
         super(context, attrs);
+        InCallCard.inCallCard = this;
         LayoutInflater inflater = LayoutInflater.from(context);
         inflater.inflate(R.layout.in_call_card, this, true);
 
@@ -626,7 +629,14 @@ public class InCallCard extends FrameLayout implements OnClickListener, Callback
             if (callInfo.isBeforeConfirmed() && callInfo.isIncoming()) {
                 dispatchTriggerEvent(IOnCallActionTrigger.REJECT_CALL);
             }else if (!callInfo.isAfterEnded()) {
+                System.out.println("\n\n terminou a chamada: ");
                 dispatchTriggerEvent(IOnCallActionTrigger.TERMINATE_CALL);
+                if(PjSipService.mosEvaluation != null)
+                    System.out.println("\n\n resultado da chamada: "+ PjSipService.mosEvaluation.toString());
+                else{
+                    System.out.println("\n\n resultado da chamada: null");
+                }
+
             }
         }
     }

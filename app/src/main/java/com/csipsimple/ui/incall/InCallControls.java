@@ -116,8 +116,7 @@ public class InCallControls extends FrameLayout implements Callback {
 	
 	public void setCallState(SipCallSession callInfo) {
 		currentCall = callInfo;
-		
-		if(currentCall == null) {
+        if(currentCall == null) {
 			setVisibility(GONE);
 			return;
 		}
@@ -139,7 +138,7 @@ public class InCallControls extends FrameLayout implements Callback {
 			break;
 		case SipCallSession.InvState.NULL:
 		case SipCallSession.InvState.DISCONNECTED:
-		    setVisibility(GONE);
+            setVisibility(GONE);
 			break;
 		case SipCallSession.InvState.EARLY:
 		default:

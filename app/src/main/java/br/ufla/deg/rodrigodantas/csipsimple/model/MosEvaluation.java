@@ -53,7 +53,7 @@ public class MosEvaluation {
     @Override
     public String toString(){
         return "Arquivo: "+this.file+
-                "\nDuracao: "+ durationInSeconds +
+                "\nDuracao: "+ durationInSeconds + " segundos "+
                 "\nPreçoPorSegundo: R$"+(new Float(pricePerMinute /60)).doubleValue()+
                 "\nMOS: "+this.mos+
                 "\nValor Justo Sugerido: "+this.fairPriceSuggested;

@@ -56,6 +56,7 @@ import com.csipsimple.service.SipService;
 import com.csipsimple.service.SipService.SameThreadException;
 import com.csipsimple.service.SipService.SipRunnable;
 import com.csipsimple.service.impl.SipCallSessionImpl;
+import com.csipsimple.ui.incall.InCallActivity;
 import com.csipsimple.utils.CallLogHelper;
 import com.csipsimple.utils.Compatibility;
 import com.csipsimple.utils.Log;
@@ -222,6 +223,7 @@ public class UAStateReceiver extends Callback {
                 }
                 // Call is now ended
                 pjService.stopDialtoneGenerator(callId);
+                System.out.println("Classe UAStateReceiver ");
                 pjService.stopRecording(callId);
                 pjService.stopPlaying(callId);
                 pjService.stopWaittoneGenerator(callId);
