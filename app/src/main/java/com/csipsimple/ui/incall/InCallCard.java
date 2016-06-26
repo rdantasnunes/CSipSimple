@@ -629,14 +629,7 @@ public class InCallCard extends FrameLayout implements OnClickListener, Callback
             if (callInfo.isBeforeConfirmed() && callInfo.isIncoming()) {
                 dispatchTriggerEvent(IOnCallActionTrigger.REJECT_CALL);
             }else if (!callInfo.isAfterEnded()) {
-                System.out.println("\n\n terminou a chamada: ");
                 dispatchTriggerEvent(IOnCallActionTrigger.TERMINATE_CALL);
-                if(PjSipService.mosEvaluation != null)
-                    System.out.println("\n\n resultado da chamada: "+ PjSipService.mosEvaluation.toString());
-                else{
-                    System.out.println("\n\n resultado da chamada: null");
-                }
-
             }
         }
     }

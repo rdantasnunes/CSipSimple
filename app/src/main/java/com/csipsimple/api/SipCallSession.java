@@ -28,8 +28,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
 
-import br.ufla.deg.rodrigodantas.csipsimple.model.MosEvaluation;
-
 /**
  * Represents state of a call session<br/>
  * This class helps to serialize/deserialize the state of the media layer <br/>
@@ -234,11 +232,6 @@ public class SipCallSession implements Parcelable {
     protected boolean isRecording = false;
     protected boolean zrtpSASVerified = false;
     protected boolean hasZrtp = false;
-
-    /**
-     * MOS information feeded after call ends.
-     */
-    private MosEvaluation mosEvaluation;
 
     /**
      * Construct from parcelable <br/>
@@ -608,13 +601,5 @@ public class SipCallSession implements Parcelable {
      */
     public long getCallStart() {
         return callStart;
-    }
-
-    public MosEvaluation getMosEvaluation(){
-        return this.mosEvaluation;
-    }
-
-    public void setMosEvaluation(MosEvaluation mosEvaluation){
-        this.mosEvaluation = mosEvaluation;
     }
 }

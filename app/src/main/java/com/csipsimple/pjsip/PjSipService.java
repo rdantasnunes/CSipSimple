@@ -22,12 +22,9 @@
 
 package com.csipsimple.pjsip;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.media.AudioManager;
@@ -36,14 +33,12 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.support.v4.app.DialogFragment;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.SparseArray;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.SurfaceView;
-import android.widget.Toast;
 
 import com.csipsimple.R;
 import com.csipsimple.api.SipCallSession;
@@ -66,7 +61,6 @@ import com.csipsimple.service.SipService.SameThreadException;
 import com.csipsimple.service.SipService.SipRunnable;
 import com.csipsimple.service.SipService.ToCall;
 import com.csipsimple.ui.incall.InCallActivity;
-import com.csipsimple.ui.incall.InCallCard;
 import com.csipsimple.utils.ExtraPlugins;
 import com.csipsimple.utils.ExtraPlugins.DynCodecInfos;
 import com.csipsimple.utils.Log;
@@ -116,9 +110,9 @@ import java.util.concurrent.ExecutionException;
 
 import br.ufla.deg.rodrigodantas.csipsimple.control.MosEvaluationControl;
 import br.ufla.deg.rodrigodantas.csipsimple.model.MosEvaluation;
-import br.ufla.deg.rodrigodantas.csipsimple.p563.P563Executer;
+import br.ufla.deg.rodrigodantas.csipsimple.util.ArquivoTexto;
 
-public class PjSipService {
+public class PjSipService{
     private static final String THIS_FILE = "PjService";
     private static int DTMF_TONE_PAUSE_LENGTH = 300;
     private static int DTMF_TONE_WAIT_LENGTH = 2000;
@@ -147,12 +141,18 @@ public class PjSipService {
     private SparseArray<PjStreamDialtoneGenerator> waittoneGenerators = new SparseArray<PjStreamDialtoneGenerator>(5);
     private String mNatDetected = "";
 
+    // -----------
+    // Mos
+    // -----------
+    public static MosEvaluation mosEvaluation;
+    public static String info;
+
     // -------
     // Locks
     // -------
 
     public PjSipService() {
-
+        PjSipService.pjSipService = this;
     }
 
     public void setService(SipService aService) {
@@ -2097,11 +2097,11 @@ public class PjSipService {
     // Recorder
     private SparseArray<List<IRecorderHandler>> callRecorders = new SparseArray<List<IRecorderHandler>>();
 
-    private class CallInfoRunnable extends AsyncTask<String, Void, String> {
+    private class CallInfoTask extends AsyncTask<String, Void, String> {
 
         private int callId;
 
-        public CallInfoRunnable(int callId){
+        public CallInfoTask(int callId){
             this.callId = callId;
         }
 
@@ -2129,14 +2129,14 @@ public class PjSipService {
      * @param callId the call id of the call to record
      * @throws SameThreadException virtual exception to be sure we are calling
      *             this from correct thread
-     *///rodrigo dantas
+     */
     public void startRecording(int callId, int way) throws SameThreadException {
         // Make sure we are in a valid state for recording
         if (!canRecord(callId)) {
             return;
         }
         //Will retrieve information about call each 1 second
-        new CallInfoRunnable(callId).execute();
+        new CallInfoTask(callId).execute();
 
         // Sanitize call way : if 0 assume all
         if (way == 0) {
@@ -2190,23 +2190,14 @@ public class PjSipService {
             userAgentReceiver.updateRecordingStatus(callId, true, false);
         }
         for(File f:audios){//rodrigo dantas
-            SipCallSession callInfo = getPublicCallInfo(callId);
             PjSipService.mosEvaluation = analyzeAudio(f,PjSipService.info);
-            callInfo.setMosEvaluation(PjSipService.mosEvaluation);
-
-            System.out.println(PjSipService.mosEvaluation.toString());
-            /*MOSDialogFragment dialog = new MOSDialogFragment();
-            dialog.setMensagem(m.toString());
-            dialog.show(dialog.getActivity().getFragmentManager(),"OK");*/
-            /*Toast toast = Toast.makeText(InCallCard.inCallCard.getContext(),m.toString(), Toast.LENGTH_LONG);
-            toast.show();*/
+            new ArquivoTexto("CSipSimple","resultado.txt").gravar(PjSipService.mosEvaluation.toString());
         }
 
         Log.e(THIS_FILE,"parou de gravar, deve ter terminado a ligacao.");
     }
 
-    public static MosEvaluation mosEvaluation;
-    public static String info;
+    public static PjSipService pjSipService;
 
     private float getPacktLossInfo(String info){
         try {

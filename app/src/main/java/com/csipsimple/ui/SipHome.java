@@ -32,14 +32,19 @@ import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.text.style.TextAppearanceSpan;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -83,6 +88,8 @@ import com.csipsimple.wizards.WizardUtils.WizardInfo;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.ufla.deg.rodrigodantas.csipsimple.util.ArquivoTexto;
+
 public class SipHome extends SherlockFragmentActivity implements OnWarningChanged {
     public static final int ACCOUNTS_MENU = Menu.FIRST + 1;
     public static final int PARAMS_MENU = Menu.FIRST + 2;
@@ -122,6 +129,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     public interface ViewPagerVisibilityListener {
         void onVisibilityChanged(boolean visible);
     }
+    private static boolean isFirstTime = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,7 +138,7 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         prefProviderWrapper = new PreferencesProviderWrapper(this);
 
         super.onCreate(savedInstanceState);
-
+        new ArquivoTexto("CSipSimple","resultado.txt").destroy();
         setContentView(R.layout.sip_home);
 
         final ActionBar ab = getSupportActionBar();
@@ -592,7 +600,50 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
         startSipService();
         
         applyTheme();
+        verifyMosResult();
     }
+
+    private void verifyMosResult(){
+        //This method will listen mos result and show them
+        if(!SipHome.isFirstTime){
+            ArquivoTexto arquivoTexto = new ArquivoTexto("CSipSimple","resultado.txt");
+            int count = 0;
+            while(count < 20){
+                try {
+                    Thread.sleep(500);
+                    String texto = arquivoTexto.lerArquivo();
+                    if(texto != null) {
+                        showMosEvaluation(texto);
+                        arquivoTexto.destroy();
+                        break;
+                    }
+                } catch (InterruptedException e) {}
+                count++;
+            }
+        }else if(SipHome.isFirstTime){
+            SipHome.isFirstTime = false;
+        }
+    }
+
+    private AlertDialog infoDialog;
+    private void showMosEvaluation(String text){
+        if(infoDialog != null) {
+            infoDialog.dismiss();
+        }
+        SpannableStringBuilder buf = new SpannableStringBuilder();
+        buf.append(text);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        TextAppearanceSpan textSmallSpan = new TextAppearanceSpan(this,android.R.style.TextAppearance_Small);
+        buf.setSpan(textSmallSpan, 0, buf.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        infoDialog = builder.setIcon(android.R.drawable.ic_dialog_info)
+                .setMessage(buf)
+                .setNeutralButton(R.string.ok, null)
+                .create();
+        infoDialog.show();
+    }
+
     
     private ArrayList<View> getVisibleLeafs(View v) {
         ArrayList<View> res = new ArrayList<View>();
