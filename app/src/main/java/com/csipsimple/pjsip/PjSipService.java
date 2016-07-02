@@ -152,7 +152,6 @@ public class PjSipService{
     // -------
 
     public PjSipService() {
-        PjSipService.pjSipService = this;
     }
 
     public void setService(SipService aService) {
@@ -2196,8 +2195,6 @@ public class PjSipService{
 
         Log.e(THIS_FILE,"parou de gravar, deve ter terminado a ligacao.");
     }
-
-    public static PjSipService pjSipService;
 
     private float getPacktLossInfo(String info){
         try {

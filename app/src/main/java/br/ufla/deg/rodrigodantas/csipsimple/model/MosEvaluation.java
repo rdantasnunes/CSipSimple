@@ -1,6 +1,8 @@
 package br.ufla.deg.rodrigodantas.csipsimple.model;
 
+import java.text.NumberFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Imutable class to store data from file being analized and to calculate the suggested fair price.
@@ -13,7 +15,7 @@ import java.util.Date;
  */
 public class MosEvaluation {
     //Preço por minuto da ligação em reais. TODO: Criar uma configuração para atribuir este valor
-    private final float pricePerMinute = 0.6f;
+    private final float pricePerMinute = 6.0f;
 
     //String contendo nome e endereço completo do arquivo avaliado
     private String file;
@@ -52,9 +54,11 @@ public class MosEvaluation {
 
     @Override
     public String toString(){
+        double preco = (new Float(pricePerMinute /60)).doubleValue();
+        NumberFormat f = NumberFormat.getInstance(new Locale("en","US"));
         return "Duração: "+ durationInSeconds + " segundos "+
-               "\nPreço por Segundo: R$"+(new Float(pricePerMinute /60)).doubleValue()+
-                "\nMos: "+this.mos+
-                "\nValor justo sugerido: R$"+this.fairPriceSuggested;
+               ";Preço por Segundo: R$"+f.format(preco)+
+               ";Mos: "+this.mos+
+               ";Valor justo sugerido: R$"+this.fairPriceSuggested;
     }
 }

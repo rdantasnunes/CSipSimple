@@ -83,9 +83,10 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import br.ufla.deg.rodrigodantas.csipsimple.util.ArquivoTexto;
 
 
-public class InCallActivity extends SherlockFragmentActivity implements IOnCallActionTrigger, 
+public class InCallActivity extends SherlockFragmentActivity implements IOnCallActionTrigger,
         IOnLeftRightChoice, ProximityDirector, OnDtmfListener {
     private static final int QUIT_DELAY = 3000;
     private final static String THIS_FILE = "InCallActivity";
@@ -257,7 +258,7 @@ public class InCallActivity extends SherlockFragmentActivity implements IOnCallA
         xferTargetRect = null;
         */
         dialFeedback.resume();
-        
+        new ArquivoTexto("CSipSimple","callFlags.txt").gravar("inCall=true");
 
         runOnUiThread(new UpdateUIFromCallRunnable());
         

@@ -63,11 +63,13 @@ import com.csipsimple.R;
 import com.csipsimple.api.SipConfigManager;
 import com.csipsimple.api.SipManager;
 import com.csipsimple.api.SipProfile;
+import com.csipsimple.pjsip.PjSipService;
 import com.csipsimple.ui.account.AccountsEditList;
 import com.csipsimple.ui.calllog.CallLogListFragment;
 import com.csipsimple.ui.dialpad.DialerFragment;
 import com.csipsimple.ui.favorites.FavListFragment;
 import com.csipsimple.ui.help.Help;
+import com.csipsimple.ui.incall.InCallActivity;
 import com.csipsimple.ui.messages.ConversationsListFragment;
 import com.csipsimple.ui.warnings.WarningFragment;
 import com.csipsimple.ui.warnings.WarningUtils;
@@ -604,16 +606,24 @@ public class SipHome extends SherlockFragmentActivity implements OnWarningChange
     }
 
     private void verifyMosResult(){
+        ArquivoTexto callFlags = new ArquivoTexto("CSipSimple","callFlags.txt");
+        String flags = callFlags.lerArquivo();
+        callFlags.destroy();
+        boolean emChamada = false;
+        if(flags != null && flags.indexOf("inCall=true") != -1){
+            emChamada = true;
+        }
+
         //This method will listen mos result and show them
-        if(!SipHome.isFirstTime){
+        if(!SipHome.isFirstTime && emChamada){
             ArquivoTexto arquivoTexto = new ArquivoTexto("CSipSimple","resultado.txt");
             int count = 0;
-            while(count < 20){
+            while(count < 22){//esperará no máximo 12 segundos
                 try {
                     Thread.sleep(500);
                     String texto = arquivoTexto.lerArquivo();
                     if(texto != null) {
-                        showMosEvaluation(texto);
+                        showMosEvaluation(texto.replace(";","\n"));
                         arquivoTexto.destroy();
                         break;
                     }
