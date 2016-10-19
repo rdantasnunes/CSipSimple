@@ -39,7 +39,7 @@ public class AutocorrellatedVoiceActivityDetector {
 
     private static final int WINDOW_MILLIS = 1;
     private static final int FADE_MILLIS = 2;
-    private static final int MIN_SILENCE_MILLIS = 10;//4;
+    private static int MIN_SILENCE_MILLIS;// = 85;//Número de milésimos de segundo do trecho de silêncio mínimo aceito no sinal. Se aumentar este valor, ele vai aceitar silencios maiores no arquivo. Se reduzir, vai consumir trecho de voz ou ruido.
     private static final int MIN_VOICE_MILLIS = 200;
 
     private double threshold = 0.0001d;
@@ -63,14 +63,40 @@ public class AutocorrellatedVoiceActivityDetector {
         this.threshold = threshold;
     }
 
+    private int getMinSilenceMillis(float plr){
+        if(plr <= 4.5f){
+            return -1;
+        }else if(plr < 6.5f){
+            return 200;
+        }else if(plr <= 9){
+            return 90;
+        }else if(plr < 15){
+            return 30;
+        }else
+            return 4;//10
+    }
+
+    /*private int getMinSilenceMillis(float plr){
+        if(plr <= 4.5f){
+            return -1;
+        }else
+            return new Double(851.73 * Math.exp(-((0.2893 * Math.exp(0.0001 * plr))) * plr)).intValue();
+            //return new Double(1030.5 * Math.exp(-0.374 * plr)).intValue();
+    }*/
     /**
      * Removes silence out of the given voice sample
      * @param voiceSample the voice sample
      * @param sampleRate the sample rate
      * @return a new voice sample with silence removed
+     * 8 elementos = 1ms
      */
-
-    public double[] removeSilence(double[] voiceSample, float sampleRate) {
+    public double[] removeSilence(double[] voiceSample, float sampleRate, float plr) {
+        MIN_SILENCE_MILLIS = getMinSilenceMillis(plr);
+        if(MIN_SILENCE_MILLIS == -1)//se plr <= 4.5, não faz nada, só devolve o sinal.
+            return voiceSample;
+        //a taxa de amostragem determina quantos elementos do vetor voiceSample representa um milésimo de segundo do áudio.
+        //se o áudio sendo testado tiver uma taxa de amostragem de 8khz, então 8 elementos do vetor voiceSample representam
+        //um milésimo de segundo no áudio.
         int oneMilliInSamples = (int)sampleRate / 1000;
 
         int length = voiceSample.length;
@@ -85,15 +111,48 @@ public class AutocorrellatedVoiceActivityDetector {
         int windowSize = WINDOW_MILLIS * oneMilliInSamples;
         double[] correllation = new double[windowSize];
         double[] window = new double[windowSize];
+        //vetor com os valores medios de nivel de energia de cada janela do sinal sendo avaliado.
+        int windowsMeanSize = 0;
+        if(voiceSample.length % windowSize == 0){
+            windowsMeanSize = voiceSample.length / windowSize;
+        } else{
+            windowsMeanSize = (voiceSample.length / windowSize)+1;
+        }
+        double[] windowsMean = new double[windowsMeanSize];
+        Arrays.fill(windowsMean, 0d);
+        int windowsPosition = 0;
+        boolean isCorte = false;
 
-
+        //divide o vetor da amostra em subvetores de tamanho windowSize e avalia se a
+        //média de cada subvetor um está acima ou abaixo do threshold
         for(int position = 0; position + windowSize < length; position += windowSize) {
             System.arraycopy(voiceSample, position, window, 0, windowSize);
             double mean = bruteForceAutocorrelation(window, correllation);
-            Arrays.fill(result, position, position + windowSize, mean > threshold);
+            windowsMean[windowsPosition] = mean;
+            double mean10FrameBefore = getMeanOf10BeforeFrames(windowsMean, (windowsPosition - 1));
+            if(mean == 0 && (mean10FrameBefore > 0.03 || isCorte)){
+                Arrays.fill(result, position, position + windowSize, true);
+                isCorte = true;
+            }else{
+                Arrays.fill(result, position, position + windowSize, mean > threshold);
+                isCorte = false;
+            }
+            windowsPosition++;
         }
+        //divide o vetor da amostra em subvetores de tamanho windowSize e avalia se a
+        //média de cada subvetor um está acima ou abaixo do threshold
+        /*for(int position = 0; position + windowSize < length; position += windowSize) {
+            System.arraycopy(voiceSample, position, window, 0, windowSize);
+            double mean = bruteForceAutocorrelation(window, correllation);
+            Arrays.fill(result, position, position + windowSize, mean > threshold);
+        }*/
 
-
+        /*
+        * Vai varrer o vetor booleano (onde false indica nao-voz) e vai inverter o valor dos trechos
+        * onde a quantidade de bytes consecutivos indicando nao-voz for menor que minSilenceLength.
+        * Por exemplo: tem um trecho de 50 bytes marcados como nao-voz, e o mínimo é 80, então estes
+        * 50 bytes serão marcados como true, ou seja, voz.
+        */
         mergeSmallSilentAreas(result, minSilenceLength);
 
         int silenceCounter = mergeSmallActiveAreas(result, minActivityLength);
@@ -128,6 +187,20 @@ public class AutocorrellatedVoiceActivityDetector {
         }
     }
 
+    private double getMeanOf10BeforeFrames(double[] windowsMean, int windowsPosition){
+        if(windowsPosition < 9){
+            return 0d;
+        }
+        double mean = 0d;
+        for(int i = windowsPosition - 9;i <= windowsPosition;i++){
+            if(windowsMean[i] < 0){
+                windowsMean[i] = windowsMean[i] * -1;
+            }
+            mean += windowsMean[i];
+        }
+        return mean / 10;
+    }
+
     /**
      * Gets the minimum voice activity length that will be considered by the remove silence method
      * @param sampleRate the sample rate
@@ -154,6 +227,8 @@ public class AutocorrellatedVoiceActivityDetector {
 
     /**
      * Merges small active areas
+     * Vai procurar areas de atividade (acima do threshold) que são menores que minActivityLength
+     * então vai converte-las para silencio, que depois serão removidos
      * @param result the voice activity result
      * @param minActivityLength the minimum length to apply
      * @return a count of silent elements
@@ -168,6 +243,7 @@ public class AutocorrellatedVoiceActivityDetector {
             while((i + increment < result.length) && result[i + increment] == active) {
                 increment++;
             }
+            //se a atividade de voz for menor que a atividade mínima configurada, então seta para silencio, o qual será removido depois.
             if(active && increment < minActivityLength) {
                 // convert short activity to opposite
                 Arrays.fill(result, i, i + increment, !active);
@@ -182,6 +258,10 @@ public class AutocorrellatedVoiceActivityDetector {
 
     /**
      * Merges small silent areas
+     * Vai varrer o vetor booleano (onde false indica nao-voz) e vai inverter o valor dos trechos
+     * onde a quantidade de bytes consecutivos indicando nao-voz for menor que minSilenceLength.
+     * Por exemplo: tem um trecho de 50 bytes marcados como nao-voz, e o mínimo é 80, então estes
+     * 50 bytes serão marcados como true, ou seja, voz.
      * @param result the voice activity result
      * @param minSilenceLength the minimum silence length to apply
      */
@@ -194,6 +274,7 @@ public class AutocorrellatedVoiceActivityDetector {
             while((i + increment < result.length) && result[i + increment] == active) {
                 increment++;
             }
+            //se for silencio e o trecho for menor que o silencio mínimo permitido, então seta para o valor oposto
             if(!active && increment < minSilenceLength) {
                 // convert short silence to opposite
                 Arrays.fill(result, i, i + increment, !active);

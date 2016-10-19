@@ -61,12 +61,12 @@ public class VadUtils {
         return f;
     }
 
-    public static File vad(String nomeArquivoEntrada) {
+    public static File vad(String nomeArquivoEntrada, float plr) {
         String now = new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
-        return retirarSilencios(nomeArquivoEntrada,"newAudioFileWithoutSilences_"+now+"_.wav");
+        return retirarSilencios(nomeArquivoEntrada,"newAudioFileWithoutSilences_"+now+"_.wav",plr);
     }
 
-    public static File retirarSilencios(String nomeArquivoEntrada, String nomeArquivoSaida) {
+    public static File retirarSilencios(String nomeArquivoEntrada, String nomeArquivoSaida,float plr) {
         AutocorrellatedVoiceActivityDetector vad = new AutocorrellatedVoiceActivityDetector();
         File f = new File(nomeArquivoEntrada);
 
@@ -97,7 +97,7 @@ public class VadUtils {
                 }
             } while (framesRead != 0);
 
-            double[] signalWithoutSilence = vad.removeSilence(buffer, sampleRate);
+            double[] signalWithoutSilence = vad.removeSilence(buffer, sampleRate,plr);
             wavFile.close(); // Close the wavFile
 
             File outputFile = new File(nomeArquivoSaida);

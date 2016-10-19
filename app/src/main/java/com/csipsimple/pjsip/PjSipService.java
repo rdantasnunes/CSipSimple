@@ -2111,6 +2111,7 @@ public class PjSipService{
             while(!callInfo.isAfterEnded()){
                 try {
                     PjSipService.info = InCallActivity.inCallActivity.getService().showCallInfosDialog(callId);
+                    System.out.println(PjSipService.info);
                     if(PjSipService.info.indexOf("RX") == -1){
                         break;
                     }

@@ -64,7 +64,7 @@ public class MosEvaluationControl {
     }
 
     private void executeVAD(){
-        this.sample = VadUtils.vad(this.sample.getAbsolutePath());
+        this.sample = VadUtils.vad(this.sample.getAbsolutePath(), getPacketLossRate());
     }
 
     private float getPacketLossRate(){
@@ -74,13 +74,16 @@ public class MosEvaluationControl {
     /**
      * Adjustment function implemantation, where n is the packet loss rate in the network.
      * f(n) = alpha*nˆ3 + beta*n^2 + gama*n + D
-     *
+     *Valores de n abaixo de aprox 1.41742 resultam em um valor positivo aumentando assim, o MOS resultante da funcao de n
      * @param mos obtained from audio sample
      * @return MOS ajusted by f(n) above.
      */
     private float executeAdjustmentFunction(float mos){
 
         double n = getPacketLossRate(); //n is packet loss rate;
+        if(n <= 1.5d)//se a taxa de perda for menor ou igual 1.5, então usa o MOS original
+            return mos;
+
         double alpha = -0.00002;
         double beta = 0.001;
         double gama = -0.043;
@@ -88,10 +91,10 @@ public class MosEvaluationControl {
         double f_n = alpha*Math.pow(n,3d) + beta*Math.pow(n,2d) + gama*n + D;
         float mosAjustado = new Double(mos*f_n).floatValue();
 
-        System.out.println("Metodo executeAdjustmentFunction MOS: "+f.format(mos));
+        /*System.out.println("Metodo executeAdjustmentFunction MOS: "+f.format(mos));
         System.out.println("Metodo executeAdjustmentFunction n: "+f.format(n));
         System.out.println("Metodo executeAdjustmentFunction f(n): "+f.format(f_n));
-        System.out.println("Metodo executeAdjustmentFunction MOS ajustado: "+f.format(mosAjustado));
+        System.out.println("Metodo executeAdjustmentFunction MOS ajustado: "+f.format(mosAjustado));*/
 
         return mosAjustado;
     }
