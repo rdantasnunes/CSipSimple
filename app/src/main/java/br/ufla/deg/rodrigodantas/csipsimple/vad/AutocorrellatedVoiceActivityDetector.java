@@ -63,6 +63,30 @@ public class AutocorrellatedVoiceActivityDetector {
         this.threshold = threshold;
     }
 
+    //base com muitos silencios
+    private int getMinSilenceMillis(float plr){
+        if(plr < 3){//de 0 a 2.9
+            return 200;
+        }else if(plr == 3f){//de 3 a 4
+            return 900;
+        }else if(plr == 3.5f){//de 3 a 4
+            return 1000;
+        }else if(plr == 4f){//de 3 a 4
+            return 900;
+        }else if(plr < 6.5f){//de 4.1 a 6.4
+            return 200;
+        }else if(plr < 9.5){//de 6.5 a 9.4
+            return 90;
+        }else if(plr <= 13){//de 9.5 a 13
+            return 82;
+        }else if(plr < 15){//de 13.1 a 14.9
+            return 80;
+        }else if(plr < 16){//de 15 a 15.9
+            return 60;
+        }else
+            return 4;
+    }
+    /* base com poucos silencios
     private int getMinSilenceMillis(float plr){
         if(plr <= 4.5f){
             return -1;
@@ -74,7 +98,7 @@ public class AutocorrellatedVoiceActivityDetector {
             return 30;
         }else
             return 4;//10
-    }
+    }*/
 
     /*private int getMinSilenceMillis(float plr){
         if(plr <= 4.5f){
@@ -159,6 +183,9 @@ public class AutocorrellatedVoiceActivityDetector {
 
 //        System.out.println((int)((double)silenceCounter / result.length * 100.0d) + "% removed");
 
+        //vai percorrer o vetor result com a identificação dos trechos de voz e silencios e
+        //então vai transferir para o vetor resultante apenas os trechos de voz, ou com silencios
+        //menores que o definido por MIN_SILENCE_MILLIS
         if (silenceCounter > 0) {
 
             int fadeLength = FADE_MILLIS * oneMilliInSamples;
