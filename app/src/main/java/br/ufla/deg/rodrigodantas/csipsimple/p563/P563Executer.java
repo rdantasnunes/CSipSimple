@@ -20,12 +20,12 @@ public class P563Executer extends AsyncTask<String, Void, String> {
             return "";
 
         if(!isExternalStorageReadable()){
-            System.out.println("\t\t nao consegue ler o device \t\t\t");
+            //System.out.println("\t\t nao consegue ler o device \t\t\t");
             return "";
         }
 
         String t = p563(params[0]);
-        System.out.println(params[0]+" MOS P.563=>" + t);
+        //System.out.println(params[0]+" MOS P.563=>" + t);
         return String.valueOf(t);
     }
 

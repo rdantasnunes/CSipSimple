@@ -32,6 +32,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.RemoteException;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -2111,7 +2112,7 @@ public class PjSipService{
             while(!callInfo.isAfterEnded()){
                 try {
                     PjSipService.info = InCallActivity.inCallActivity.getService().showCallInfosDialog(callId);
-                    System.out.println(PjSipService.info);
+                    //System.out.println(PjSipService.info);
                     if(PjSipService.info.indexOf("RX") == -1){
                         break;
                     }
@@ -2175,6 +2176,7 @@ public class PjSipService{
         List<IRecorderHandler> recorders = callRecorders.get(callId, null);
         List<File> audios = new ArrayList<File>();
         if (recorders != null) {
+
             for (IRecorderHandler recorder : recorders) {
                 recorder.stopRecording();
                 // Broadcast to other apps the a new sip record has been done
@@ -2189,11 +2191,14 @@ public class PjSipService{
             callRecorders.delete(callId);
             userAgentReceiver.updateRecordingStatus(callId, true, false);
         }
+
+        try {//rodrigo
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {}
         for(File f:audios){//rodrigo dantas
             PjSipService.mosEvaluation = analyzeAudio(f,PjSipService.info);
             new ArquivoTexto("CSipSimple","resultado.txt").gravar(PjSipService.mosEvaluation.toString());
         }
-
         Log.e(THIS_FILE,"parou de gravar, deve ter terminado a ligacao.");
     }
 
@@ -2387,7 +2392,7 @@ public class PjSipService{
     
     /**
      * Stop connection between mic source to speaker output.
-     * @see startLoopbackTest
+     * see //startLoopbackTest
      */
     public void stopLoopbackTest() {
         pjsua.conf_disconnect(0, 0);

@@ -65,6 +65,7 @@ public class SimpleWavRecorderHandler implements IRecorderHandler {
         }
     }
 
+
     /**
      * Get the file to record to for a given remote contact. This will
      * implicitly get the current date in file name.
@@ -86,6 +87,7 @@ public class SimpleWavRecorderHandler implements IRecorderHandler {
             }
             File file = new File(dir.getAbsoluteFile() + File.separator
                     + fileName + ".wav");
+            System.out.println("nome do arquivo: "+fileName);
             return file;
         }
         return null;
@@ -96,6 +98,7 @@ public class SimpleWavRecorderHandler implements IRecorderHandler {
         fileName = fileName.replaceAll("[\\.\\\\<>:; \"\'\\*]", "_");
         return fileName;
     }
+
 
     @Override
     public void startRecording() {

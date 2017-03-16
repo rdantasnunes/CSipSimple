@@ -45,6 +45,14 @@ public class MosEvaluationControl {
         f.setMaximumFractionDigits(6);
     }
 
+    public MosEvaluationControl(File sample, float packetLossRate){
+        super();
+        this.sample = sample;
+        this.packetLossRate = packetLossRate;
+        //this.context = context;
+        f.setMaximumFractionDigits(6);
+    }
+
     private String calculateP563(){
         try{
             P563Executer p563Executer = new P563Executer();
@@ -88,7 +96,7 @@ public class MosEvaluationControl {
         double beta = 0.001;
         double gama = -0.043;
         double D = 1.059;
-        double f_n = alpha*Math.pow(n,3d) + beta*Math.pow(n,2d) + gama*n + D;
+        double f_n = alpha * Math.pow(n,3d) + beta * Math.pow(n,2d) + gama * n + D;
         float mosAjustado = new Double(mos*f_n).floatValue();
 
         /*System.out.println("Metodo executeAdjustmentFunction MOS: "+f.format(mos));
@@ -104,6 +112,7 @@ public class MosEvaluationControl {
         executeVAD();
 
         String mos = calculateP563();
+        //System.out.println("MOS do P563 "+mos);
 
         Float mosF = Utils.parseToFloat(mos);
         if(mosF == -1){
@@ -111,10 +120,12 @@ public class MosEvaluationControl {
         }
 
         mosF = executeAdjustmentFunction(mosF);
+        ///System.out.println("MOS do f(n) "+mosF);
 
         this.mosEvaluation = new MosEvaluation(this.sample.getAbsolutePath(),
                 f.format(mosF.doubleValue()),new Date(),
-                VadUtils.durationOfAudioSample(this.sample,context));
+                VadUtils.durationOfAudioSample(this.sample));
+        this.mosEvaluation.setPlr(this.packetLossRate);
 
     }
 

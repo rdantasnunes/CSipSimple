@@ -223,7 +223,7 @@ public class UAStateReceiver extends Callback {
                 }
                 // Call is now ended
                 pjService.stopDialtoneGenerator(callId);
-                System.out.println("Classe UAStateReceiver ");
+                //System.out.println("Classe UAStateReceiver ");
                 pjService.stopRecording(callId);
                 pjService.stopPlaying(callId);
                 pjService.stopWaittoneGenerator(callId);

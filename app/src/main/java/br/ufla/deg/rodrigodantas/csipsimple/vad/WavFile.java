@@ -769,7 +769,7 @@ public class WavFile {
                 do {
                     framesRead = readWavFile.readFrames(buffer, BUF_SIZE);
                     framesWritten = writeWavFile.writeFrames(buffer, BUF_SIZE);
-                    System.out.printf("%d %d\n", framesRead, framesWritten);
+                    //System.out.printf("%d %d\n", framesRead, framesWritten);
                 } while (framesRead != 0);
 
                 readWavFile.close();

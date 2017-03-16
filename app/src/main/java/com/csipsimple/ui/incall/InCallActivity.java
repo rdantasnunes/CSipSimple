@@ -893,7 +893,7 @@ public class InCallActivity extends SherlockFragmentActivity implements IOnCallA
                 case TERMINATE_CALL: {
                     if (service != null) {
                         service.hangup(call.getCallId(), 0);
-                        System.out.println("passou pelo ontrigger do incallactivity");
+                        //System.out.println("passou pelo ontrigger do incallactivity");
                     }
                     break;
                 }

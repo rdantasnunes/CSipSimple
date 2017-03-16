@@ -15,7 +15,7 @@ import java.util.Locale;
  */
 public class MosEvaluation {
     //Preço por minuto da ligação em reais. TODO: Criar uma configuração para atribuir este valor
-    private final float pricePerMinute = 6.0f;
+    private final float pricePerMinute = 60.0f;
 
     //String contendo nome e endereço completo do arquivo avaliado
     private String file;
@@ -31,6 +31,8 @@ public class MosEvaluation {
 
     //Preço justo sugerido com base no MOS e no Valor por minuto
     private Float fairPriceSuggested;
+
+    private float plr;
 
     public MosEvaluation(String file, String mos, Date dateHourEndedCall, int durationInSeconds){
         super();
@@ -52,6 +54,10 @@ public class MosEvaluation {
         return this.fairPriceSuggested;
     }
 
+    public void setPlr(float plr){
+        this.plr = plr;
+    }
+
     @Override
     public String toString(){
         double preco = (new Float(pricePerMinute /60)).doubleValue();
@@ -59,6 +65,7 @@ public class MosEvaluation {
         return "Duração: "+ durationInSeconds + " segundos "+
                ";Preço por Segundo: R$"+f.format(preco)+
                ";Mos: "+this.mos+
+               ";PLR: "+f.format(plr)+
                ";Valor justo sugerido: R$"+this.fairPriceSuggested;
     }
 }

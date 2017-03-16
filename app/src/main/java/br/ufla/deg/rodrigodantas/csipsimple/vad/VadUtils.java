@@ -3,6 +3,7 @@ package br.ufla.deg.rodrigodantas.csipsimple.vad;
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Environment;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -44,9 +45,56 @@ public class VadUtils {
         return out.toByteArray();
     }
 
-    public static int durationOfAudioSample(File file, Context context){
+    /*public static int durationOfAudioSample(File file, Context context){
         MediaPlayer mp = MediaPlayer.create(context, Uri.parse(file.getAbsolutePath()));
         return mp.getDuration()/1000;
+    }*/
+
+    public static int durationOfAudioSample(File f){
+
+        WavFile wavFile = null;
+        try {
+            wavFile = WavFile.openWavFile(f); // Open the wav file specified as the first argument
+
+            int numChannels = wavFile.getNumChannels(); // Get the number of audio channels in the wav file
+            // Create a buffer of 100 frames
+            double[] bufferAux = new double[(int) wavFile.getNumFrames() * numChannels];
+            double[] buffer = new double[(int) wavFile.getNumFrames() * numChannels];
+
+            long sampleRate = wavFile.getSampleRate();
+            int k = 0;
+            int framesRead, lim, m;
+            long remaining;
+
+            do {//vai ler de 1000 em 1000 frames
+                m = 0;
+                remaining = wavFile.getFramesRemaining();
+                lim = (remaining > 1000) ? 1000 : (int) remaining;
+                // Read frames into bufferAux
+                framesRead = wavFile.readFrames(bufferAux, lim);
+                while (m < lim) { //vai copiar os bytes lidos acima e salvar no buffer definitivo
+                    buffer[k] = bufferAux[m];
+                    m += 1;
+                    k += 1;
+                }
+            } while (framesRead != 0);
+
+            int duration = new Double(buffer.length / wavFile.getSampleRate()).intValue();
+            wavFile.close(); // Close the wavFile
+
+
+            return duration;
+
+        } catch (IOException | WavFileException ex) {
+            //Logger.getLogger(Util.class.getName()).log(Level.SEVERE, null, ex);
+            return 0;
+        } finally{
+            try {
+                wavFile.close();
+            } catch (NullPointerException | IOException ex) {
+                //ignorar este erro
+            }
+        }
     }
 
     public static File write(String outputPath, byte[] audio) throws Exception {
@@ -63,7 +111,8 @@ public class VadUtils {
 
     public static File vad(String nomeArquivoEntrada, float plr) {
         String now = new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
-        return retirarSilencios(nomeArquivoEntrada,"newAudioFileWithoutSilences_"+now+"_.wav",plr);
+        return retirarSilencios(nomeArquivoEntrada,Environment.getExternalStorageDirectory().getAbsolutePath()
+                        + "/CSipSimple/records/new_"+now+"_.wav",plr);
     }
 
     public static File retirarSilencios(String nomeArquivoEntrada, String nomeArquivoSaida,float plr) {
